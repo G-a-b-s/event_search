@@ -1,60 +1,23 @@
 import 'package:flutter/material.dart';
-import 'register.dart';
 
-void main() {
-  runApp(const MainApp());
-}
-
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Login',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFF6A8A99)),
-      ),
-      home: const MyHomePage(title: 'EventSearch'),
-    );
-  }
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
+class _RegisterPageState extends State<RegisterPage> {
   bool _obscurePassword = true;
-  int _selectedIndex = 0;
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
+  bool _obscureConfirmPassword = true;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFF6A8A99),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(widget.title),
-            const Divider(
-              color: Colors.black,
-              thickness: 1, // Espessura do divisor
-              height: 1, // Altura do divisor
-            ),
-          ],
-        ),
+        title: const Text('Cadastro'),
+        centerTitle: true,
       ),
       body: Container(
         decoration: const BoxDecoration(
@@ -73,12 +36,26 @@ class _MyHomePageState extends State<MyHomePage> {
               child: ListView(
                 children: <Widget>[
                   TextField(
+                    keyboardType: TextInputType.name,
+                    decoration: InputDecoration(
+                      labelText: 'Nome',
+                      labelStyle: const TextStyle(color: Colors.black),
+                      filled: true,
+                      fillColor: const Color(0xFFE3C8A8),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
+                    maxLength: 50,
+                  ),
+                  const SizedBox(height: 16.0),
+                  TextField(
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
                       labelText: 'Email',
                       labelStyle: const TextStyle(color: Colors.black),
                       filled: true,
-                      fillColor: Color(0xFFE3C8A8),
+                      fillColor: const Color(0xFFE3C8A8),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
                       ),
@@ -92,7 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       labelText: 'Senha',
                       labelStyle: const TextStyle(color: Colors.black),
                       filled: true,
-                      fillColor: Color(0xFFE3C8A8),
+                      fillColor: const Color(0xFFE3C8A8),
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscurePassword ? Icons.visibility : Icons.visibility_off,
@@ -101,6 +78,31 @@ class _MyHomePageState extends State<MyHomePage> {
                         onPressed: () {
                           setState(() {
                             _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
+                    maxLength: 16,
+                  ),
+                  const SizedBox(height: 16.0),
+                  TextField(
+                    obscureText: _obscureConfirmPassword,
+                    decoration: InputDecoration(
+                      labelText: 'Confirmar Senha',
+                      labelStyle: const TextStyle(color: Colors.black),
+                      filled: true,
+                      fillColor: const Color(0xFFE3C8A8),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
+                          color: Colors.black,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscureConfirmPassword = !_obscureConfirmPassword;
                           });
                         },
                       ),
@@ -120,36 +122,19 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                     ),
                     onPressed: () {
-                      // Lógica do botão Logar
+                      // Lógica do botão Cadastrar
                     },
-                    child: const Text('Logar'),
-                  ),
-                  const SizedBox(height: 16.0),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFE3C8A8),
-                      foregroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                    ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const RegisterPage()),
-                      );
-                    },
-                    child: const Text('Registrar'),
+                    child: const Text('Cadastrar'),
                   ),
                   const SizedBox(height: 16.0),
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: () {
-                        // Lógica do botão Esqueci minha senha
+                        Navigator.pop(context); // Voltar para a tela de login
                       },
                       child: const Text(
-                        'Esqueci minha senha',
+                        'Voltar para o Login',
                         style: TextStyle(color: Colors.black),
                       ),
                     ),
@@ -158,29 +143,6 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
           ),
-        ),
-      ),
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          border: Border(
-            top: BorderSide(color: Colors.black, width: 1),
-          ),
-        ),
-        child: BottomNavigationBar(
-          backgroundColor: const Color(0xFFE3C8A8),
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person),
-              label: 'Login',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Home',
-            ),
-          ],
-          currentIndex: _selectedIndex,
-          selectedItemColor: const Color(0xFF6A8A99),
-          onTap: _onItemTapped,
         ),
       ),
     );
