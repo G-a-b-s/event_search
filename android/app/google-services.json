@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "755479771172",
+    "project_id": "eventsearch-ee86d",
+    "storage_bucket": "eventsearch-ee86d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:755479771172:android:e2a1345b4ed61ea6bd80b1",
+        "android_client_info": {
+          "package_name": "com.example.event_search"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDdCc0x60aS1dVcgqr1n3QiEnMvZDf3p-Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'register.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // precisa disso antes do Firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform, // aqui ele usa o arquivo gerado
+  );
   runApp(const MainApp());
 }
 
@@ -32,7 +39,8 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   bool _obscurePassword = true;
   int _selectedIndex = 0;
-
+  final TextEditingController _email = TextEditingController();
+  final TextEditingController _senha = TextEditingController();
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -74,6 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 children: <Widget>[
                   TextField(
                     keyboardType: TextInputType.emailAddress,
+                    controller:_email,
                     decoration: InputDecoration(
                       labelText: 'Email',
                       labelStyle: const TextStyle(color: Colors.black),
@@ -88,6 +97,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   const SizedBox(height: 16.0),
                   TextField(
                     obscureText: _obscurePassword,
+                    controller:_senha,
                     decoration: InputDecoration(
                       labelText: 'Senha',
                       labelStyle: const TextStyle(color: Colors.black),
@@ -119,8 +129,56 @@ class _MyHomePageState extends State<MyHomePage> {
                         borderRadius: BorderRadius.circular(8.0),
                       ),
                     ),
-                    onPressed: () {
-                      // Lógica do botão Logar
+                    onPressed: () async {
+                      final email = _email.text.trim();
+                      final senha = _senha.text.trim();
+
+                      if (email.isEmpty || senha.isEmpty) {
+                        _showError("Preencha Email e Senha.");
+                        return;
+                      }
+                      _showLoading(context);
+
+                      try {
+                        // Login com Firebase
+                        await FirebaseAuth.instance.signInWithEmailAndPassword(
+                          email: email,
+                          password: senha,
+                        );
+
+                        _hideLoading(context);
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Login realizado com sucesso!')),
+                        );
+
+                        // Navegar para a tela principal:
+                        // Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomePage()));
+
+                      } on FirebaseAuthException catch (e) {
+                        _hideLoading(context);
+                        String mensagem = '';
+
+                        switch (e.code) {
+                          case 'invalid-email':
+                            mensagem = 'Email inválido.';
+                            break;
+                          case 'user-not-found':
+                            mensagem = 'Usuário não encontrado.';
+                            break;
+                          case 'wrong-password':
+                            mensagem = 'Senha incorreta.';
+                            break;
+                          default:
+                            mensagem = 'Erro de login: ${e.message}';
+                            break;
+                        }
+
+                        _showError(mensagem);
+                      } catch (e) {
+                        _hideLoading(context);
+                        _showError('Erro inesperado: $e');
+                      }
                     },
                     child: const Text('Logar'),
                   ),
@@ -185,4 +243,23 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+  void _showError(String mensage) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(mensage)),
+    );
+  }
+  void _showLoading(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Impede que o modal seja fechado ao clicar fora
+      builder: (BuildContext context) {
+        return const Center(
+          child: CircularProgressIndicator(), // Indicador de progresso circular
+        );
+    },
+  );
+}
+void _hideLoading(BuildContext context) {
+  Navigator.pop(context); // Fecha o modal de loading
+}
 }

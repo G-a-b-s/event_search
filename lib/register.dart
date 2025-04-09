@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -10,6 +12,10 @@ class RegisterPage extends StatefulWidget {
 class _RegisterPageState extends State<RegisterPage> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  final TextEditingController _nome = TextEditingController();
+  final TextEditingController _email = TextEditingController();
+  final TextEditingController _senha = TextEditingController();
+  final TextEditingController _confirmarSenha = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +43,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 children: <Widget>[
                   TextField(
                     keyboardType: TextInputType.name,
+                    controller: _nome,
                     decoration: InputDecoration(
                       labelText: 'Nome',
                       labelStyle: const TextStyle(color: Colors.black),
@@ -51,6 +58,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(height: 16.0),
                   TextField(
                     keyboardType: TextInputType.emailAddress,
+                    controller: _email,
                     decoration: InputDecoration(
                       labelText: 'Email',
                       labelStyle: const TextStyle(color: Colors.black),
@@ -65,6 +73,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(height: 16.0),
                   TextField(
                     obscureText: _obscurePassword,
+                    controller: _senha,
                     decoration: InputDecoration(
                       labelText: 'Senha',
                       labelStyle: const TextStyle(color: Colors.black),
@@ -90,6 +99,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(height: 16.0),
                   TextField(
                     obscureText: _obscureConfirmPassword,
+                    controller: _confirmarSenha,
                     decoration: InputDecoration(
                       labelText: 'Confirmar Senha',
                       labelStyle: const TextStyle(color: Colors.black),
@@ -121,8 +131,49 @@ class _RegisterPageState extends State<RegisterPage> {
                         borderRadius: BorderRadius.circular(8.0),
                       ),
                     ),
-                    onPressed: () {
-                      // Lógica do botão Cadastrar
+                    onPressed: () async {
+                      final nome = _nome.text.trim();
+                      final email = _email.text.trim();
+                      final senha = _senha.text.trim();
+                      final confirmarSenha = _confirmarSenha.text.trim();
+
+                      if (nome.isEmpty || email.isEmpty || senha.isEmpty || confirmarSenha.isEmpty) {
+                        _showError('Preencha todos os campos.');
+                        return;
+                      }
+
+                      if (senha != confirmarSenha) {
+                        _showError('As senhas não coincidem.');
+                        return;
+                      }
+                      _showLoading(context);
+
+                      try {
+                        final cred = await FirebaseAuth.instance
+                            .createUserWithEmailAndPassword(email: email, password: senha);
+
+                        await FirebaseFirestore.instance
+                            .collection('cadastro')
+                            .doc(cred.user!.uid)
+                            .set({
+                              'nome': nome,
+                              'email': email,
+                              'dataCadastro': Timestamp.now(),
+                            });
+
+                        _hideLoading(context);
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Usuário cadastrado com sucesso!')),
+                        );
+
+                        Navigator.pop(context);
+                      } on FirebaseAuthException catch (e) {
+                        _showError('Erro de autenticação: ${e.message}');
+                      } catch (e) {
+                        _hideLoading(context);
+                        _showError('Erro inesperado: $e');
+                      }
                     },
                     child: const Text('Cadastrar'),
                   ),
@@ -131,7 +182,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: () {
-                        Navigator.pop(context); // Voltar para a tela de login
+                        Navigator.pop(context);
                       },
                       child: const Text(
                         'Voltar para o Login',
@@ -147,4 +198,24 @@ class _RegisterPageState extends State<RegisterPage> {
       ),
     );
   }
+
+  void _showError(String mensage) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(mensage)),
+    );
+  }
+  void _showLoading(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Impede que o modal seja fechado ao clicar fora
+      builder: (BuildContext context) {
+        return const Center(
+          child: CircularProgressIndicator(), // Indicador de progresso circular
+        );
+      },
+    );
+  }
+  void _hideLoading(BuildContext context) {
+    Navigator.pop(context); // Fecha o modal de loading
+}
 }
