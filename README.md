@@ -1,6 +1,5 @@
 # 📱 EventSearch
 
-EventSearch é um aplicativo Flutter que permite o cadastro e login de usuários utilizando o Firebase Authentication, e armazena dados adicionais como nome e data de criação no Cloud Firestore.
 
 ## 🚀 Como rodar o projeto em outra máquina
 
