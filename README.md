@@ -14,6 +14,7 @@ Certifique-se de ter instalado:
 - FlutterFire CLI: https://firebase.flutter.dev/docs/cli/
 - Um editor como o VS Code ou Android Studio
 - Emulador Android ou navegador Chrome (caso for rodar como app web)
+- Criar conta no FireStore e entrar no projeto: [FireStore](https://console.firebase.google.com/u/0/project/eventsearch-ee86d/firestore?fb_gclid=Cj0KCQjwlrvBBhDnARIsAHEQgOQt24C0c4sPslAl6H5A-de8WnHvw7dGp7yr7XlWjPC-LNbsyC3gXeUaAvCCEALw_wcB)
 
 ### 📥 1. Clonar o repositório
 
