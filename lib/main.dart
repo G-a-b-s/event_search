@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'register.dart';
+import 'event_list_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // precisa disso antes do Firebase
@@ -42,10 +43,17 @@ class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _email = TextEditingController();
   final TextEditingController _senha = TextEditingController();
   void _onItemTapped(int index) {
+  if (index == 2) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const EventListPage()),
+    );
+  } else {
     setState(() {
       _selectedIndex = index;
     });
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -234,6 +242,10 @@ class _MyHomePageState extends State<MyHomePage> {
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
               label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.event),
+              label: 'Eventos',
             ),
           ],
           currentIndex: _selectedIndex,
