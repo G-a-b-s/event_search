@@ -1,0 +1,121 @@
+import 'package:flutter/material.dart';
+
+class EventListPage extends StatelessWidget {
+  const EventListPage({super.key});
+
+  final List<Map<String, String>> events = const [
+    {
+      'nome': 'Cinema na rua',
+      'data': '25/03/2025',
+      'hora': '19:30',
+      'endereco': 'Av. Sinfrônio Brochado',
+    },
+    {
+      'nome': 'Feirinha na rua',
+      'data': '30/03/2025',
+      'hora': '11:00',
+      'endereco': 'Av. Coronel Durval de Barros',
+    },
+    {
+      'nome': 'Celula',
+      'data': '28/03/2025',
+      'hora': '19:30',
+      'endereco': 'Av. Flor de Seda',
+    },
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Eventos'),
+        backgroundColor: const Color(0xFF6A8A99),
+        centerTitle: true,
+      ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF6A8A99), Color(0xFFE3C8A8)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: events.length,
+          itemBuilder: (context, index) {
+            final event = events[index];
+            return Card(
+              color: const Color(0xFFE3C8A8),
+              margin: const EdgeInsets.only(bottom: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Stack(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.event, color: Colors.black),
+                            const SizedBox(width: 8),
+                            Text(
+                              event['nome']!,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            const Icon(Icons.calendar_today, size: 20),
+                            const SizedBox(width: 8),
+                            Text(event['data']!),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            const Icon(Icons.access_time, size: 20),
+                            const SizedBox(width: 8),
+                            Text(event['hora']!),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            const Icon(Icons.location_on, size: 20),
+                            const SizedBox(width: 8),
+                            Flexible(child: Text(event['endereco']!)),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  Positioned(
+                    right: 4,
+                    top: 4,
+                    child: IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Evento "${event['nome']}" excluído.')),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
