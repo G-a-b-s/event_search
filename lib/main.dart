@@ -39,21 +39,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   bool _obscurePassword = true;
-  int _selectedIndex = 0;
   final TextEditingController _email = TextEditingController();
   final TextEditingController _senha = TextEditingController();
-  void _onItemTapped(int index) {
-  if (index == 2) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const EventListPage()),
-    );
-  } else {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -66,8 +53,8 @@ class _MyHomePageState extends State<MyHomePage> {
             Text(widget.title),
             const Divider(
               color: Colors.black,
-              thickness: 1, // Espessura do divisor
-              height: 1, // Altura do divisor
+              thickness: 1,
+              height: 1,
             ),
           ],
         ),
@@ -161,7 +148,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         );
 
                         // Navegar para a tela principal:
-                        // Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomePage()));
+                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => EventListPage()));
 
                       } on FirebaseAuthException catch (e) {
                         _hideLoading(context);
@@ -226,33 +213,6 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
       ),
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          border: Border(
-            top: BorderSide(color: Colors.black, width: 1),
-          ),
-        ),
-        child: BottomNavigationBar(
-          backgroundColor: const Color(0xFFE3C8A8),
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person),
-              label: 'Login',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.event),
-              label: 'Eventos',
-            ),
-          ],
-          currentIndex: _selectedIndex,
-          selectedItemColor: const Color(0xFF6A8A99),
-          onTap: _onItemTapped,
-        ),
-      ),
     );
   }
   void _showError(String mensage) {
@@ -263,15 +223,15 @@ class _MyHomePageState extends State<MyHomePage> {
   void _showLoading(BuildContext context) {
     showDialog(
       context: context,
-      barrierDismissible: false, // Impede que o modal seja fechado ao clicar fora
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return const Center(
-          child: CircularProgressIndicator(), // Indicador de progresso circular
+          child: CircularProgressIndicator(),
         );
     },
   );
 }
 void _hideLoading(BuildContext context) {
-  Navigator.pop(context); // Fecha o modal de loading
+  Navigator.pop(context);
 }
 }

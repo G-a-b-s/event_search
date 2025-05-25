@@ -1,7 +1,22 @@
+import 'package:event_search/main.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class EventListPage extends StatelessWidget {
+class EventListPage extends StatefulWidget {
   const EventListPage({super.key});
+
+  @override
+  State<EventListPage> createState() => _EventListPageState();
+}
+
+class _EventListPageState extends State<EventListPage> {
+  int _selectedIndex = 0;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   final List<Map<String, String>> events = const [
     {
@@ -116,6 +131,37 @@ class EventListPage extends StatelessWidget {
           },
         ),
       ),
+      bottomNavigationBar: BottomNavigationBar(
+      backgroundColor: const Color(0xFFE3C8A8),
+      currentIndex: _selectedIndex,
+      selectedItemColor: const Color(0xFF6A8A99),
+      unselectedItemColor: Colors.black,
+      items: const [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home),
+          label: 'Home',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.logout),
+          label: 'Sair',
+        ),
+      ],
+      onTap: (index) async {
+        setState(() {
+          _selectedIndex = index;
+        });
+        if (index == 0) {
+        } else if (index == 1) {
+          // Sair (logout)
+          await FirebaseAuth.instance.signOut();
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (_) => MyHomePage(title: 'EventSearch')),
+            (route) => false,
+          );
+        }
+      },
+    ),
     );
   }
 }
