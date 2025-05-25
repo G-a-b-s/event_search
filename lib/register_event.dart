@@ -11,8 +11,6 @@ class RegisterEvent extends StatefulWidget {
 }
 
 class _RegisterEventState extends State<RegisterEvent> {
-  bool _obscurePassword = true;
-  bool _obscureConfirmPassword = true;
   final TextEditingController _nomeEvento = TextEditingController();
   final TextEditingController _endereco = TextEditingController();
   final TextEditingController _data = TextEditingController();

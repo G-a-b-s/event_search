@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'register.dart';
-import 'register_event.dart'; // Updated import to point to RegisterEvent
+import 'event_list_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // precisa disso antes do Firebase
@@ -39,28 +39,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   bool _obscurePassword = true;
-  int _selectedIndex = 0;
   final TextEditingController _email = TextEditingController();
   final TextEditingController _senha = TextEditingController();
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-
-    // Navigation logic for BottomNavigationBar
-    if (index == 0) {
-      // Stay on Login screen (current screen)
-    } else if (index == 1) {
-      // Navigate to Home screen (to be implemented)
-      // Navigator.push(context, MaterialPageRoute(builder: (_) => HomePage()));
-    } else if (index == 2) {
-      // Navigate to RegisterEvent screen
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const RegisterEvent()),
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,8 +53,8 @@ class _MyHomePageState extends State<MyHomePage> {
             Text(widget.title),
             const Divider(
               color: Colors.black,
-              thickness: 1, // Espessura do divisor
-              height: 1, // Altura do divisor
+              thickness: 1,
+              height: 1,
             ),
           ],
         ),
@@ -168,7 +148,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         );
 
                         // Navegar para a tela principal:
-                        // Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomePage()));
+                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => EventListPage()));
 
                       } on FirebaseAuthException catch (e) {
                         _hideLoading(context);
@@ -233,33 +213,6 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
       ),
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          border: Border(
-            top: BorderSide(color: Colors.black, width: 1),
-          ),
-        ),
-        child: BottomNavigationBar(
-          backgroundColor: const Color(0xFFE3C8A8),
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person),
-              label: 'Login',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.event),
-              label: 'Cadastrar Evento',
-            ),
-          ],
-          currentIndex: _selectedIndex,
-          selectedItemColor: const Color(0xFF6A8A99),
-          onTap: _onItemTapped,
-        ),
-      ),
     );
   }
   void _showError(String mensage) {
@@ -270,15 +223,15 @@ class _MyHomePageState extends State<MyHomePage> {
   void _showLoading(BuildContext context) {
     showDialog(
       context: context,
-      barrierDismissible: false, // Impede que o modal seja fechado ao clicar fora
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return const Center(
-          child: CircularProgressIndicator(), // Indicador de progresso circular
+          child: CircularProgressIndicator(),
         );
     },
   );
 }
 void _hideLoading(BuildContext context) {
-  Navigator.pop(context); // Fecha o modal de loading
+  Navigator.pop(context);
 }
 }

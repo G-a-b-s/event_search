@@ -207,15 +207,15 @@ class _RegisterPageState extends State<RegisterPage> {
   void _showLoading(BuildContext context) {
     showDialog(
       context: context,
-      barrierDismissible: false, // Impede que o modal seja fechado ao clicar fora
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return const Center(
-          child: CircularProgressIndicator(), // Indicador de progresso circular
+          child: CircularProgressIndicator(),
         );
       },
     );
   }
   void _hideLoading(BuildContext context) {
-    Navigator.pop(context); // Fecha o modal de loading
+    Navigator.pop(context);
 }
 }
