@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'register.dart';
+import 'register_event.dart'; // Updated import to point to RegisterEvent
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // precisa disso antes do Firebase
@@ -45,6 +46,20 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       _selectedIndex = index;
     });
+
+    // Navigation logic for BottomNavigationBar
+    if (index == 0) {
+      // Stay on Login screen (current screen)
+    } else if (index == 1) {
+      // Navigate to Home screen (to be implemented)
+      // Navigator.push(context, MaterialPageRoute(builder: (_) => HomePage()));
+    } else if (index == 2) {
+      // Navigate to RegisterEvent screen
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const RegisterEvent()),
+      );
+    }
   }
 
   @override
@@ -234,6 +249,10 @@ class _MyHomePageState extends State<MyHomePage> {
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
               label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.event),
+              label: 'Cadastrar Evento',
             ),
           ],
           currentIndex: _selectedIndex,
