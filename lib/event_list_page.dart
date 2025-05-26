@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'edit_event_screen.dart';
 
 class EventListPage extends StatelessWidget {
   const EventListPage({super.key});
@@ -101,13 +102,44 @@ class EventListPage extends StatelessWidget {
                   Positioned(
                     right: 4,
                     top: 4,
-                    child: IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.red),
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Evento "${event['nome']}" excluído.')),
-                        );
-                      },
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Row(
+                          children: [
+                            Positioned(
+                              right: 4,
+                              top: 4,
+                              child: IconButton(
+                                icon: const Icon(Icons.delete, color: Colors.red),
+                                onPressed: () {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Evento "${event['nome']}" excluído.')),
+                                  );
+                                },
+                              ),
+                            ),
+                            Positioned(
+                              right: 4,
+                              top: 4,
+                              child: IconButton(
+                                icon: const Icon(Icons.edit, color: Colors.blue),
+                                onPressed: () {
+                                  // Suppose you’ve already fetched your event document as a Map:
+                                 final Map<String, dynamic> eventData = event as Map<String, dynamic>;
+
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      fullscreenDialog: true,
+                                      builder: (ctx) => EditEvent(eventData: eventData),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                 ],
