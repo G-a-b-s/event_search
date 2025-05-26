@@ -1,12 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'event_list_page.dart';
+import 'main.dart';
 
-class MapScreen extends StatelessWidget {
+class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
+
+  @override
+  State<MapScreen> createState() => _MapScreenState();
+}
+
+class _MapScreenState extends State<MapScreen> {
+  int _selectedIndex = 1;
+
+  void _onItemTapped(int index) async {
+    setState(() {
+      _selectedIndex = index;
+    });
+    if (index == 0) {
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const EventListPage()),
+      );
+    } else if (index == 1) {
+
+    } else if (index == 2) {
+
+      await FirebaseAuth.instance.signOut();
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const MyHomePage(title: 'EventSearch')),
+        (route) => false,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Corpo com gradiente
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -17,14 +49,11 @@ class MapScreen extends StatelessWidget {
         ),
         child: Stack(
           children: [
-            // Simulação de mapa como fundo (ex: imagem de mapa estático ou container)
             Positioned.fill(
               child: Container(
-                color: Colors.white.withOpacity(0.3), // transparência para simular mapa
+                color: Colors.white.withOpacity(0.3),
               ),
             ),
-
-            // Campo de busca
             Positioned(
               top: 60,
               left: 16,
@@ -55,26 +84,26 @@ class MapScreen extends StatelessWidget {
           ],
         ),
       ),
-
-      // Bottom Navigation Bar
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: const Color(0xFFC0AF96),
+        currentIndex: _selectedIndex,
         selectedItemColor: Colors.black,
         unselectedItemColor: Colors.black54,
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.map),
-            label: '',
+            icon: Icon(Icons.home),
+            label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.menu),
-            label: '',
+            icon: Icon(Icons.search),
+            label: 'Mapa',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.add),
-            label: '',
+            icon: Icon(Icons.logout),
+            label: 'Sair',
           ),
         ],
+        onTap: _onItemTapped,
       ),
     );
   }
