@@ -1,8 +1,24 @@
+import 'package:event_search/main.dart';
+import 'package:event_search/map_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'edit_event_screen.dart';
 
-class EventListPage extends StatelessWidget {
+class EventListPage extends StatefulWidget {
   const EventListPage({super.key});
+
+  @override
+  State<EventListPage> createState() => _EventListPageState();
+}
+
+class _EventListPageState extends State<EventListPage> {
+  int _selectedIndex = 0;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   final List<Map<String, String>> events = const [
     {
@@ -126,7 +142,11 @@ class EventListPage extends StatelessWidget {
                                 icon: const Icon(Icons.edit, color: Colors.blue),
                                 onPressed: () {
                                   // Suppose you’ve already fetched your event document as a Map:
+<<<<<<< HEAD
                                  final Map<String, dynamic> eventData = event as Map<String, dynamic>;
+=======
+                                  final Map<String, dynamic> eventData = event as Map<String, dynamic>;
+>>>>>>> main
 
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
@@ -147,6 +167,48 @@ class EventListPage extends StatelessWidget {
             );
           },
         ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: const Color(0xFFE3C8A8),
+        currentIndex: _selectedIndex,
+        selectedItemColor: const Color(0xFF6A8A99),
+        unselectedItemColor: Colors.black,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.search), // Ícone de lupa
+            label: 'Mapa',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.logout),
+            label: 'Sair',
+          ),
+        ],
+        onTap: (index) async {
+          setState(() {
+            _selectedIndex = index;
+          });
+          if (index == 0) {
+
+          } else if (index == 1) {
+
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const MapScreen()),
+            );
+          } else if (index == 2) {
+
+            await FirebaseAuth.instance.signOut();
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (_) => MyHomePage(title: 'EventSearch')),
+              (route) => false,
+            );
+          }
+        },
       ),
     );
   }

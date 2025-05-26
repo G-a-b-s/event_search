@@ -6,9 +6,15 @@ import 'package:intl/intl.dart';
 class EditEvent extends StatefulWidget {
   final Map<String, dynamic> eventData;
   const EditEvent({
+<<<<<<< HEAD
     Key? key,
     required this.eventData,
   }) : super(key: key);
+=======
+    super.key,
+    required this.eventData,
+  });
+>>>>>>> main
 
   @override
   State<EditEvent> createState() => _EditEventState();
@@ -44,7 +50,11 @@ class _EditEventState extends State<EditEvent> {
     }
 
     final rawTime = widget.eventData['hora'] as String? ?? '';
+<<<<<<< HEAD
    _hora = TextEditingController(text: rawTime);
+=======
+    _hora = TextEditingController(text: rawTime);
+>>>>>>> main
 
   if (rawTime.contains(':')) {
     final parts = rawTime.split(':');
@@ -70,7 +80,11 @@ class _EditEventState extends State<EditEvent> {
     }
     _didDeps = true;
   }
+<<<<<<< HEAD
   
+=======
+
+>>>>>>> main
   Future<void> _selectDate(BuildContext context) async {
     final picked = await showDatePicker(
       context: context,

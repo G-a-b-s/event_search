@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
 
 class MapScreen extends StatelessWidget {
   const MapScreen({super.key});
@@ -7,6 +8,48 @@ class MapScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       // Corpo com gradiente
+=======
+import 'package:firebase_auth/firebase_auth.dart';
+import 'event_list_page.dart';
+import 'main.dart';
+
+class MapScreen extends StatefulWidget {
+  const MapScreen({super.key});
+
+  @override
+  State<MapScreen> createState() => _MapScreenState();
+}
+
+class _MapScreenState extends State<MapScreen> {
+  int _selectedIndex = 1;
+
+  void _onItemTapped(int index) async {
+    setState(() {
+      _selectedIndex = index;
+    });
+    if (index == 0) {
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const EventListPage()),
+      );
+    } else if (index == 1) {
+
+    } else if (index == 2) {
+
+      await FirebaseAuth.instance.signOut();
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const MyHomePage(title: 'EventSearch')),
+        (route) => false,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+>>>>>>> main
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -17,6 +60,7 @@ class MapScreen extends StatelessWidget {
         ),
         child: Stack(
           children: [
+<<<<<<< HEAD
             // Simulação de mapa como fundo (ex: imagem de mapa estático ou container)
             Positioned.fill(
               child: Container(
@@ -25,6 +69,13 @@ class MapScreen extends StatelessWidget {
             ),
 
             // Campo de busca
+=======
+            Positioned.fill(
+              child: Container(
+                color: Colors.white.withOpacity(0.3),
+              ),
+            ),
+>>>>>>> main
             Positioned(
               top: 60,
               left: 16,
@@ -55,14 +106,21 @@ class MapScreen extends StatelessWidget {
           ],
         ),
       ),
+<<<<<<< HEAD
 
       // Bottom Navigation Bar
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: const Color(0xFFC0AF96),
+=======
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: const Color(0xFFC0AF96),
+        currentIndex: _selectedIndex,
+>>>>>>> main
         selectedItemColor: Colors.black,
         unselectedItemColor: Colors.black54,
         items: const [
           BottomNavigationBarItem(
+<<<<<<< HEAD
             icon: Icon(Icons.map),
             label: '',
           ),
@@ -79,3 +137,22 @@ class MapScreen extends StatelessWidget {
     );
   }
 }
+=======
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.search),
+            label: 'Mapa',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.logout),
+            label: 'Sair',
+          ),
+        ],
+        onTap: _onItemTapped,
+      ),
+    );
+  }
+}
+>>>>>>> main
