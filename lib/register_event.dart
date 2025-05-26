@@ -7,7 +7,7 @@ import 'map_screen.dart';
 import 'main.dart';
 
 class RegisterEvent extends StatefulWidget {
-  const RegisterEvent({super.key});
+const RegisterEvent({super.key});
 
   @override
   State<RegisterEvent> createState() => _RegisterEventState();
@@ -235,32 +235,39 @@ class _RegisterEventState extends State<RegisterEvent> {
           ),
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: const Color(0xFFE3C8A8),
-        currentIndex: _selectedIndex,
-        selectedItemColor: const Color(0xFF6A8A99),
-        unselectedItemColor: Colors.black,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Eventos',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: 'Mapa',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.event),
-            label: 'Cadastrar Evento',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.logout),
-            label: 'Sair',
-          ),
-        ],
-        onTap: _onItemTapped,
+      bottomNavigationBar: Container(
+        decoration: const BoxDecoration(
+            color: Color(0xFFE3C8A8),
+        ),
+        child: BottomNavigationBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          currentIndex: _selectedIndex,
+          selectedItemColor: const Color(0xFF6A8A99),
+          unselectedItemColor: Colors.black,
+          type: BottomNavigationBarType.fixed,
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Eventos',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.search),
+              label: 'Mapa',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.event),
+              label: 'Cadastrar Evento',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.logout),
+              label: 'Sair',
+            ),
+          ],
+          onTap: _onItemTapped,
+        ),
       ),
-    );
+      );
   }
 
   void _showError(String message) {

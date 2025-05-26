@@ -19,9 +19,6 @@ class _EditEventState extends State<EditEvent> {
   late final TextEditingController _endereco;
   late final TextEditingController _data;
   late final TextEditingController _hora;
-  // late final TextEditingController _email;
-  // late final TextEditingController _senha;
-  // late final TextEditingController _confirmarSenha;
 
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
