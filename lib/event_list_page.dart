@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'edit_event_screen.dart';
 import 'register_event.dart';
+
 class EventListPage extends StatefulWidget {
   const EventListPage({super.key});
 
@@ -14,31 +15,31 @@ class EventListPage extends StatefulWidget {
 class _EventListPageState extends State<EventListPage> {
   int _selectedIndex = 0;
 
-  void _onItemTapped(int index) {
+  void _onItemTapped(int index) async {
     setState(() {
       _selectedIndex = index;
     });
 
     if (index == 0) {
-      // Navigate to Home (MyHomePage)
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => const MyHomePage(title: 'EventSearch')),
-        (route) => false,
-      );
+      // Eventos (já está nesta tela)
     } else if (index == 1) {
-      // Navigate to RegisterEvent screen
-      Navigator.push(
+      // Mapa
+      Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const RegisterEvent()),
+        MaterialPageRoute(builder: (_) => const MapScreen()),
       );
     } else if (index == 2) {
-      // Logout
-      FirebaseAuth.instance.signOut();
+      // Cadastrar Evento
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const RegisterEvent()),
+      );
+    } else if (index == 3) {
+      // Sair (logout)
+      await FirebaseAuth.instance.signOut();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Logout realizado com sucesso!')),
       );
-      // Navigate back to the login screen
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (_) => const MyHomePage(title: 'EventSearch')),
@@ -168,9 +169,7 @@ class _EventListPageState extends State<EventListPage> {
                               child: IconButton(
                                 icon: const Icon(Icons.edit, color: Colors.blue),
                                 onPressed: () {
-                                  // Suppose you’ve already fetched your event document as a Map:
                                   final Map<String, dynamic> eventData = event as Map<String, dynamic>;
-
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
                                       fullscreenDialog: true,
@@ -199,7 +198,7 @@ class _EventListPageState extends State<EventListPage> {
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: 'Home',
+            label: 'Eventos',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.search),

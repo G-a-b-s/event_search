@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'event_list_page.dart';
+import 'map_screen.dart';
+import 'main.dart';
 
 class RegisterEvent extends StatefulWidget {
   const RegisterEvent({super.key});
@@ -15,12 +18,9 @@ class _RegisterEventState extends State<RegisterEvent> {
   final TextEditingController _endereco = TextEditingController();
   final TextEditingController _data = TextEditingController();
   final TextEditingController _hora = TextEditingController();
-  final TextEditingController _email = TextEditingController();
-  final TextEditingController _senha = TextEditingController();
-  final TextEditingController _confirmarSenha = TextEditingController();
-  
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
+  int _selectedIndex = 2;
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -50,6 +50,32 @@ class _RegisterEventState extends State<RegisterEvent> {
     }
   }
 
+  void _onItemTapped(int index) async {
+    setState(() {
+      _selectedIndex = index;
+    });
+    if (index == 0) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const EventListPage()),
+      );
+    } else if (index == 1) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const MapScreen()),
+      );
+    } else if (index == 2) {
+      // Já está na tela de cadastro de evento
+    } else if (index == 3) {
+      await FirebaseAuth.instance.signOut();
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const MyHomePage(title: 'EventSearch')),
+        (route) => false,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,7 +100,7 @@ class _RegisterEventState extends State<RegisterEvent> {
               padding: const EdgeInsets.all(16.0),
               child: ListView(
                 children: <Widget>[
-                  // Event Name
+                  // Nome do Evento
                   TextField(
                     keyboardType: TextInputType.text,
                     controller: _nomeEvento,
@@ -90,7 +116,7 @@ class _RegisterEventState extends State<RegisterEvent> {
                     maxLength: 50,
                   ),
                   const SizedBox(height: 16.0),
-                  // Address
+                  // Endereço
                   TextField(
                     keyboardType: TextInputType.streetAddress,
                     controller: _endereco,
@@ -106,7 +132,7 @@ class _RegisterEventState extends State<RegisterEvent> {
                     maxLength: 100,
                   ),
                   const SizedBox(height: 16.0),
-                  // Date
+                  // Data
                   TextField(
                     controller: _data,
                     readOnly: true,
@@ -125,7 +151,7 @@ class _RegisterEventState extends State<RegisterEvent> {
                     ),
                   ),
                   const SizedBox(height: 16.0),
-                  // Time
+                  // Hora
                   TextField(
                     controller: _hora,
                     readOnly: true,
@@ -144,7 +170,6 @@ class _RegisterEventState extends State<RegisterEvent> {
                     ),
                   ),
                   const SizedBox(height: 16.0),
-                  // Save Event Button
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF6A8A99),
@@ -158,23 +183,12 @@ class _RegisterEventState extends State<RegisterEvent> {
                       final endereco = _endereco.text.trim();
                       final data = _data.text.trim();
                       final hora = _hora.text.trim();
-                      final email = _email.text.trim();
-                      final senha = _senha.text.trim();
-                      final confirmarSenha = _confirmarSenha.text.trim();
 
                       if (nomeEvento.isEmpty ||
                           endereco.isEmpty ||
                           data.isEmpty ||
-                          hora.isEmpty ||
-                          email.isEmpty ||
-                          senha.isEmpty ||
-                          confirmarSenha.isEmpty) {
+                          hora.isEmpty) {
                         _showError('Preencha todos os campos.');
-                        return;
-                      }
-
-                      if (senha != confirmarSenha) {
-                        _showError('As senhas não coincidem.');
                         return;
                       }
 
@@ -198,7 +212,6 @@ class _RegisterEventState extends State<RegisterEvent> {
                           'endereco': endereco,
                           'data': data,
                           'hora': hora,
-                          'email': email,
                           'dataCadastro': Timestamp.now(),
                         });
 
@@ -216,24 +229,36 @@ class _RegisterEventState extends State<RegisterEvent> {
                     },
                     child: const Text('Salvar Evento'),
                   ),
-                  const SizedBox(height: 16.0),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text(
-                        'Voltar para o Login',
-                        style: TextStyle(color: Colors.black),
-                      ),
-                    ),
-                  ),
-                ],
+                  ],
               ),
             ),
           ),
         ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: const Color(0xFFE3C8A8),
+        currentIndex: _selectedIndex,
+        selectedItemColor: const Color(0xFF6A8A99),
+        unselectedItemColor: Colors.black,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Eventos',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.search),
+            label: 'Mapa',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.event),
+            label: 'Cadastrar Evento',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.logout),
+            label: 'Sair',
+          ),
+        ],
+        onTap: _onItemTapped,
       ),
     );
   }

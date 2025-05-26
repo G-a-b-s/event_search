@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'event_list_page.dart';
+import 'register_event.dart';
 import 'main.dart';
 
 class MapScreen extends StatefulWidget {
@@ -11,22 +12,28 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  int _selectedIndex = 1;
+  int _selectedIndex = 1; // Mapa selecionado por padrão
 
   void _onItemTapped(int index) async {
     setState(() {
       _selectedIndex = index;
     });
     if (index == 0) {
-
+      // Eventos
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const EventListPage()),
       );
     } else if (index == 1) {
-
+      // Mapa (já está aqui)
     } else if (index == 2) {
-
+      // Cadastrar Evento
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const RegisterEvent()),
+      );
+    } else if (index == 3) {
+      // Sair (logout)
       await FirebaseAuth.instance.signOut();
       Navigator.pushAndRemoveUntil(
         context,
@@ -92,11 +99,15 @@ class _MapScreenState extends State<MapScreen> {
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: 'Home',
+            label: 'Eventos',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.search),
             label: 'Mapa',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.event),
+            label: 'Cadastrar Evento',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.logout),
