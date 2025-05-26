@@ -3,7 +3,7 @@ import 'package:event_search/map_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'edit_event_screen.dart';
-
+import 'register_event.dart';
 class EventListPage extends StatefulWidget {
   const EventListPage({super.key});
 
@@ -18,6 +18,33 @@ class _EventListPageState extends State<EventListPage> {
     setState(() {
       _selectedIndex = index;
     });
+
+    if (index == 0) {
+      // Navigate to Home (MyHomePage)
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const MyHomePage(title: 'EventSearch')),
+        (route) => false,
+      );
+    } else if (index == 1) {
+      // Navigate to RegisterEvent screen
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const RegisterEvent()),
+      );
+    } else if (index == 2) {
+      // Logout
+      FirebaseAuth.instance.signOut();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Logout realizado com sucesso!')),
+      );
+      // Navigate back to the login screen
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const MyHomePage(title: 'EventSearch')),
+        (route) => false,
+      );
+    }
   }
 
   final List<Map<String, String>> events = const [
@@ -175,36 +202,19 @@ class _EventListPageState extends State<EventListPage> {
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.search), // Ícone de lupa
+            icon: Icon(Icons.search),
             label: 'Mapa',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.event),
+            label: 'Cadastrar Evento',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.logout),
             label: 'Sair',
           ),
         ],
-        onTap: (index) async {
-          setState(() {
-            _selectedIndex = index;
-          });
-          if (index == 0) {
-
-          } else if (index == 1) {
-
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const MapScreen()),
-            );
-          } else if (index == 2) {
-
-            await FirebaseAuth.instance.signOut();
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (_) => MyHomePage(title: 'EventSearch')),
-              (route) => false,
-            );
-          }
-        },
+        onTap: _onItemTapped,
       ),
     );
   }
