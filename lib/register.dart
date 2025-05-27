@@ -141,13 +141,11 @@ class _RegisterPageState extends State<RegisterPage> {
                         _showError('Preencha todos os campos.');
                         return;
                       }
-
                       if (senha != confirmarSenha) {
                         _showError('As senhas não coincidem.');
                         return;
                       }
                       _showLoading(context);
-
                       try {
                         final cred = await FirebaseAuth.instance
                             .createUserWithEmailAndPassword(email: email, password: senha);
@@ -169,6 +167,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
                         Navigator.pop(context);
                       } on FirebaseAuthException catch (e) {
+                        _hideLoading(context);
                         _showError('Erro de autenticação: ${e.message}');
                       } catch (e) {
                         _hideLoading(context);
