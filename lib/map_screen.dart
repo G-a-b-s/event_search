@@ -88,12 +88,25 @@ class _MapScreenState extends State<MapScreen> {
                 ),
               ),
             ),
+            Positioned(
+              top: 120,
+              left: 16,
+              right: 16,
+              bottom: 16,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.asset(
+                  'lib/assets/maps.png',
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
           ],
         ),
       ),
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
-            color: Color(0xFFE3C8A8),
+          color: Color(0xFFE3C8A8),
         ),
         child: BottomNavigationBar(
           backgroundColor: Colors.transparent,
