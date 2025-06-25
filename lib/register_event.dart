@@ -5,9 +5,10 @@ import 'package:intl/intl.dart';
 import 'event_list_page.dart';
 import 'map_screen.dart';
 import 'main.dart';
+import 'package:geocoding/geocoding.dart';
 
 class RegisterEvent extends StatefulWidget {
-const RegisterEvent({super.key});
+  const RegisterEvent({super.key});
 
   @override
   State<RegisterEvent> createState() => _RegisterEventState();
@@ -16,6 +17,7 @@ const RegisterEvent({super.key});
 class _RegisterEventState extends State<RegisterEvent> {
   final TextEditingController _nomeEvento = TextEditingController();
   final TextEditingController _endereco = TextEditingController();
+  final TextEditingController _cep = TextEditingController();
   final TextEditingController _data = TextEditingController();
   final TextEditingController _hora = TextEditingController();
   DateTime? _selectedDate;
@@ -45,7 +47,8 @@ class _RegisterEventState extends State<RegisterEvent> {
     if (picked != null && picked != _selectedTime) {
       setState(() {
         _selectedTime = picked;
-        _hora.text = picked.format(context);
+        // Sempre salva no formato 24h
+        _hora.text = picked.hour.toString().padLeft(2, '0') + ':' + picked.minute.toString().padLeft(2, '0');
       });
     }
   }
@@ -65,7 +68,7 @@ class _RegisterEventState extends State<RegisterEvent> {
         MaterialPageRoute(builder: (_) => const MapScreen()),
       );
     } else if (index == 2) {
-      // Já está na tela de cadastro de evento
+      // já está na tela de cadastro
     } else if (index == 3) {
       await FirebaseAuth.instance.signOut();
       Navigator.pushAndRemoveUntil(
@@ -132,6 +135,22 @@ class _RegisterEventState extends State<RegisterEvent> {
                     maxLength: 100,
                   ),
                   const SizedBox(height: 16.0),
+                  // Cep
+                  TextField(
+                    keyboardType: TextInputType.number,
+                    controller: _cep,
+                    decoration: InputDecoration(
+                      labelText: 'CEP',
+                      labelStyle: const TextStyle(color: Colors.black),
+                      filled: true,
+                      fillColor: const Color(0xFFE3C8A8),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
+                    maxLength: 20,
+                  ),
+                  const SizedBox(height: 16.0),
                   // Data
                   TextField(
                     controller: _data,
@@ -181,55 +200,105 @@ class _RegisterEventState extends State<RegisterEvent> {
                     onPressed: () async {
                       final nomeEvento = _nomeEvento.text.trim();
                       final endereco = _endereco.text.trim();
-                      final data = _data.text.trim();
-                      final hora = _hora.text.trim();
+                      final cepText = _cep.text.trim();
+                      final dataText = _data.text.trim();
+                      final horaText = _hora.text.trim();
 
                       if (nomeEvento.isEmpty ||
                           endereco.isEmpty ||
-                          data.isEmpty ||
-                          hora.isEmpty) {
+                          cepText.isEmpty ||
+                          dataText.isEmpty ||
+                          horaText.isEmpty) {
                         _showError('Preencha todos os campos.');
                         return;
                       }
 
-                      _showLoading(context);
+                      int? cep = int.tryParse(cepText.replaceAll(RegExp(r'[^0-9]'), ''));
+                      if (cep == null) {
+                        _showError('CEP inválido.');
+                        return;
+                      }
 
                       try {
-                        // Fetch the current authenticated user
-                        final User? user = FirebaseAuth.instance.currentUser;
-                        if (user == null) {
-                          _hideLoading(context);
-                          _showError('Nenhum usuário autenticado encontrado.');
+                        final dataParts = dataText.split('/');
+                        final horaParts = horaText.split(':');
+                        if (dataParts.length != 3 || horaParts.length != 2) {
+                          _showError('Data ou hora inválida.');
                           return;
                         }
-
-                        // Save event data to Firestore using the current user's UID
-                        await FirebaseFirestore.instance
-                            .collection('eventos')
-                            .doc(user.uid)
-                            .set({
-                          'nomeEvento': nomeEvento,
-                          'endereco': endereco,
-                          'data': data,
-                          'hora': hora,
-                          'dataCadastro': Timestamp.now(),
-                        });
-
-                        _hideLoading(context);
-
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Evento cadastrado com sucesso!')),
+                        final eventDateTime = DateTime(
+                          int.parse(dataParts[2]),
+                          int.parse(dataParts[1]),
+                          int.parse(dataParts[0]),
+                          int.parse(horaParts[0]),
+                          int.parse(horaParts[1]),
                         );
+                        final Timestamp dataHora = Timestamp.fromDate(eventDateTime);
 
-                        Navigator.pop(context);
+                        _showLoading(context);
+
+                        try {
+                          // Geocoding: busca latitude/longitude pelo endereço ou CEP
+                          List<Location> locations = [];
+                          try {
+                            locations = await locationFromAddress('$endereco, $cepText');
+                          } catch (_) {
+                            // Tenta só pelo CEP se falhar
+                            locations = await locationFromAddress(cepText);
+                          }
+
+                          double? latitude;
+                          double? longitude;
+                          if (locations.isNotEmpty) {
+                            latitude = locations.first.latitude;
+                            longitude = locations.first.longitude;
+                          }
+
+                          if (latitude == null || longitude == null) {
+                            _hideLoading(context);
+                            _showError('Não foi possível localizar o endereço.');
+                            return;
+                          }
+
+                          final user = FirebaseAuth.instance.currentUser;
+                          if (user == null) {
+                            _hideLoading(context);
+                            _showError('Usuário não autenticado.');
+                            return;
+                          }
+
+                          await FirebaseFirestore.instance.collection('eventos').add({
+                            'nomeEvento': nomeEvento,
+                            'endereco': endereco,
+                            'cep': cep,
+                            'dataHora': dataHora,
+                            'dataCadastro': Timestamp.now(),
+                            'userId': user.uid,
+                            'localizacao': GeoPoint(latitude, longitude),
+                          });
+
+                          _hideLoading(context);
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Evento cadastrado com sucesso!')),
+                          );
+
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(builder: (_) => const EventListPage()),
+                            (route) => false,
+                          );
+                        } catch (e) {
+                          _hideLoading(context);
+                          _showError('Erro ao salvar evento: $e');
+                        }
                       } catch (e) {
-                        _hideLoading(context);
-                        _showError('Erro ao salvar evento: $e');
+                        _showError('Data ou hora inválida. $e');
                       }
                     },
                     child: const Text('Salvar Evento'),
                   ),
-                  ],
+                ],
               ),
             ),
           ),
@@ -237,7 +306,7 @@ class _RegisterEventState extends State<RegisterEvent> {
       ),
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
-            color: Color(0xFFE3C8A8),
+          color: Color(0xFFE3C8A8),
         ),
         child: BottomNavigationBar(
           backgroundColor: Colors.transparent,
@@ -267,7 +336,7 @@ class _RegisterEventState extends State<RegisterEvent> {
           onTap: _onItemTapped,
         ),
       ),
-      );
+    );
   }
 
   void _showError(String message) {

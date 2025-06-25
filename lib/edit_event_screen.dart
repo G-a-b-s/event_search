@@ -15,57 +15,37 @@ class EditEvent extends StatefulWidget {
 }
 
 class _EditEventState extends State<EditEvent> {
-  late final TextEditingController _nome;
+  late final TextEditingController _nomeEvento;
   late final TextEditingController _endereco;
+  late final TextEditingController _cep;
   late final TextEditingController _data;
   late final TextEditingController _hora;
 
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
-  bool _didDeps = false;
 
   @override
   void initState() {
     super.initState();
 
-    // Initialize controllers with the incoming event data:
-    _nome = TextEditingController(text: widget.eventData['nome'] as String? ?? '');
+    _nomeEvento = TextEditingController(text: widget.eventData['nomeEvento'] as String? ?? '');
     _endereco   = TextEditingController(text: widget.eventData['endereco']   as String? ?? '');
+    _cep        = TextEditingController(text: widget.eventData['cep']?.toString() ?? '');
 
-    final rawDate = widget.eventData['data'];
-    if (rawDate is Timestamp) {
-      _selectedDate = rawDate.toDate();
-      _data = TextEditingController(text: DateFormat('dd/MM/yyyy').format(_selectedDate!));
+    // Data e hora
+    final rawTimestamp = widget.eventData['dataHora'];
+    if (rawTimestamp is Timestamp) {
+      final dt = rawTimestamp.toDate();
+      _selectedDate = dt;
+      _selectedTime = TimeOfDay(hour: dt.hour, minute: dt.minute);
+      _data = TextEditingController(text: DateFormat('dd/MM/yyyy').format(dt));
+      _hora = TextEditingController(
+        text: dt.hour.toString().padLeft(2, '0') + ':' + dt.minute.toString().padLeft(2, '0'),
+      );
     } else {
-      _data = TextEditingController(text: widget.eventData['data'] as String? ?? '');
+      _data = TextEditingController();
+      _hora = TextEditingController();
     }
-
-    final rawTime = widget.eventData['hora'] as String? ?? '';
-    _hora = TextEditingController(text: rawTime);
-
-  if (rawTime.contains(':')) {
-    final parts = rawTime.split(':');
-    _selectedTime = TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
-  }
-
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    if (_selectedTime != null) {
-      _hora.text = _selectedTime!.format(context);
-    }
-  });
-
-    // _email            = TextEditingController(text: widget.eventData['email'] as String? ?? '');
-    // _senha            = TextEditingController();
-    // _confirmarSenha   = TextEditingController();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_didDeps && _selectedTime != null) {
-      _hora.text = _selectedTime!.format(context);
-    }
-    _didDeps = true;
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -78,7 +58,7 @@ class _EditEventState extends State<EditEvent> {
     if (picked != null) {
       setState(() {
         _selectedDate = picked;
-        _data.text   = DateFormat('dd/MM/yyyy').format(picked);
+        _data.text = DateFormat('dd/MM/yyyy').format(picked);
       });
     }
   }
@@ -91,7 +71,7 @@ class _EditEventState extends State<EditEvent> {
     if (picked != null) {
       setState(() {
         _selectedTime = picked;
-        _hora.text    = picked.format(context);
+        _hora.text = picked.hour.toString().padLeft(2, '0') + ':' + picked.minute.toString().padLeft(2, '0');
       });
     }
   }
@@ -122,7 +102,7 @@ class _EditEventState extends State<EditEvent> {
                 children: <Widget>[
                   // Nome do Evento
                   TextField(
-                    controller: _nome,
+                    controller: _nomeEvento,
                     decoration: _inputDecoration('Nome do Evento'),
                     maxLength: 50,
                   ),
@@ -132,6 +112,14 @@ class _EditEventState extends State<EditEvent> {
                     controller: _endereco,
                     decoration: _inputDecoration('Endereço'),
                     maxLength: 100,
+                  ),
+                  const SizedBox(height: 16.0),
+                  // Cep
+                  TextField(
+                    controller: _cep,
+                    keyboardType: TextInputType.number,
+                    decoration: _inputDecoration('CEP'),
+                    maxLength: 20,
                   ),
                   const SizedBox(height: 16.0),
                   // Data
@@ -189,40 +177,69 @@ class _EditEventState extends State<EditEvent> {
   }
 
   Future<void> _saveEvent() async {
-    final nome = _nome.text.trim();
-    final endereco   = _endereco.text.trim();
-    final data       = _data.text.trim();
-    final hora       = _hora.text.trim();
-    if (nome.isEmpty || endereco.isEmpty || data.isEmpty || hora.isEmpty) {
+    final nomeEvento = _nomeEvento.text.trim();
+    final endereco = _endereco.text.trim();
+    final cepText = _cep.text.trim();
+    final dataText = _data.text.trim();
+    final horaText = _hora.text.trim();
+
+    if (nomeEvento.isEmpty || endereco.isEmpty || cepText.isEmpty || dataText.isEmpty || horaText.isEmpty) {
       _showError('Preencha todos os campos.');
       return;
     }
 
-    _showLoading(context);
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) throw 'Usuário não autenticado';
+    int? cep = int.tryParse(cepText.replaceAll(RegExp(r'[^0-9]'), ''));
+    if (cep == null) {
+      _showError('CEP inválido.');
+      return;
+    }
 
-      await FirebaseFirestore.instance
-          .collection('eventos')
-          .doc(user.uid)
-          .update({
-        'nomeEvento': nome,
-        'endereco'  : endereco,
-        'data'      : data,
-        'hora'      : hora,
+    try {
+      final dataParts = dataText.split('/');
+      final horaParts = horaText.split(':');
+      final eventDateTime = DateTime(
+        int.parse(dataParts[2]),
+        int.parse(dataParts[1]),
+        int.parse(dataParts[0]),
+        int.parse(horaParts[0]),
+        int.parse(horaParts[1]),
+      );
+      final Timestamp dataHora = Timestamp.fromDate(eventDateTime);
+
+      _showLoading(context);
+
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        _hideLoading(context);
+        _showError('Usuário não autenticado.');
+        return;
+      }
+
+      final docId = widget.eventData['docId'];
+      if (docId == null) {
+        _hideLoading(context);
+        _showError('ID do evento não encontrado.');
+        return;
+      }
+
+      await FirebaseFirestore.instance.collection('eventos').doc(docId).update({
+        'nomeEvento': nomeEvento,
+        'endereco': endereco,
+        'cep': cep,
+        'dataHora': dataHora,
         'dataAtualizacao': Timestamp.now(),
+        'userId': user.uid,
       });
 
-      Navigator.pop(context); // hide loading
+      _hideLoading(context);
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Evento atualizado com sucesso!')),
       );
-      Navigator.pop(context); // close edit modal
+      Navigator.pop(context);
     } catch (e) {
-      Navigator.pop(context);
+      _hideLoading(context);
       _showError('Erro ao salvar evento: $e');
-      Navigator.pop(context);
     }
   }
 
@@ -238,10 +255,15 @@ class _EditEventState extends State<EditEvent> {
     );
   }
 
+  void _hideLoading(BuildContext context) {
+    Navigator.pop(context);
+  }
+
   @override
   void dispose() {
-    _nome.dispose();
+    _nomeEvento.dispose();
     _endereco.dispose();
+    _cep.dispose();
     _data.dispose();
     _hora.dispose();
     super.dispose();
