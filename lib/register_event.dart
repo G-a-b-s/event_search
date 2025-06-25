@@ -47,7 +47,8 @@ class _RegisterEventState extends State<RegisterEvent> {
     if (picked != null && picked != _selectedTime) {
       setState(() {
         _selectedTime = picked;
-        _hora.text = picked.format(context);
+        // Sempre salva no formato 24h
+        _hora.text = picked.hour.toString().padLeft(2, '0') + ':' + picked.minute.toString().padLeft(2, '0');
       });
     }
   }
@@ -221,6 +222,10 @@ class _RegisterEventState extends State<RegisterEvent> {
                       try {
                         final dataParts = dataText.split('/');
                         final horaParts = horaText.split(':');
+                        if (dataParts.length != 3 || horaParts.length != 2) {
+                          _showError('Data ou hora inválida.');
+                          return;
+                        }
                         final eventDateTime = DateTime(
                           int.parse(dataParts[2]),
                           int.parse(dataParts[1]),
@@ -278,13 +283,17 @@ class _RegisterEventState extends State<RegisterEvent> {
                             const SnackBar(content: Text('Evento cadastrado com sucesso!')),
                           );
 
-                          Navigator.pop(context);
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(builder: (_) => const EventListPage()),
+                            (route) => false,
+                          );
                         } catch (e) {
                           _hideLoading(context);
                           _showError('Erro ao salvar evento: $e');
                         }
                       } catch (e) {
-                        _showError('Data ou hora inválida.');
+                        _showError('Data ou hora inválida. $e');
                       }
                     },
                     child: const Text('Salvar Evento'),
