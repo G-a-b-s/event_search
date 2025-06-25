@@ -77,7 +77,9 @@ class _EventListPageState extends State<EventListPage> {
                     return const Center(child: CircularProgressIndicator());
                   }
                   if (snapshot.hasError) {
-                    return Center(child: Text('Erro ao carregar eventos.'));
+                    print('user: $user');
+                    return Center(child: Text('Erro ao carregar eventos: ${snapshot.error}'));
+                    //return Center(child: Text('Erro ao carregar eventos.'));
                   }
                   final docs = snapshot.data?.docs ?? [];
                   if (docs.isEmpty) {

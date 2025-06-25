@@ -23,7 +23,6 @@ class _EditEventState extends State<EditEvent> {
 
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
-  bool _didDeps = false;
 
   @override
   void initState() {
@@ -40,26 +39,13 @@ class _EditEventState extends State<EditEvent> {
       _selectedDate = dt;
       _selectedTime = TimeOfDay(hour: dt.hour, minute: dt.minute);
       _data = TextEditingController(text: DateFormat('dd/MM/yyyy').format(dt));
-      _hora = TextEditingController(text: dt.hour.toString().padLeft(2, '0') + ':' + dt.minute.toString().padLeft(2, '0'));
+      _hora = TextEditingController(
+        text: dt.hour.toString().padLeft(2, '0') + ':' + dt.minute.toString().padLeft(2, '0'),
+      );
     } else {
       _data = TextEditingController();
       _hora = TextEditingController();
     }
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_selectedTime != null) {
-        _hora.text = _selectedTime!.format(context);
-      }
-    });
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_didDeps && _selectedTime != null) {
-      _hora.text = _selectedTime!.format(context);
-    }
-    _didDeps = true;
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -85,7 +71,7 @@ class _EditEventState extends State<EditEvent> {
     if (picked != null) {
       setState(() {
         _selectedTime = picked;
-        _hora.text = picked.format(context);
+        _hora.text = picked.hour.toString().padLeft(2, '0') + ':' + picked.minute.toString().padLeft(2, '0');
       });
     }
   }
