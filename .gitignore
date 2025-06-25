@@ -10,7 +10,9 @@ build/
 .idea/
 android/.gradle/
 *.iml
-
+**/linux/flutter/generated_*
+**/windows/flutter/generated_*
+**/macos/Flutter/GeneratedPluginRegistrant.swift
 # iOS
 ios/Pods/
 ios/.symlinks/
