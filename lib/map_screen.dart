@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'event_list_page.dart';
 import 'register_event.dart';
 import 'main.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -12,28 +14,68 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  int _selectedIndex = 1; // Mapa selecionado por padrão
+  int _selectedIndex = 1;
+  GoogleMapController? _mapController;
+  Set<Marker> _markers = {};
+  String _searchText = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMarkers();
+  }
+
+  Future<void> _loadMarkers() async {
+    final query = await FirebaseFirestore.instance.collection('eventos').get();
+    final markers = <Marker>{};
+    for (var doc in query.docs) {
+      final data = doc.data();
+      if (data['localizacao'] != null && data['nomeEvento'] != null) {
+        final geo = data['localizacao'];
+        if (_searchText.isEmpty ||
+            (data['nomeEvento']?.toLowerCase() ?? '').contains(_searchText.toLowerCase())) {
+          markers.add(
+            Marker(
+              markerId: MarkerId(doc.id),
+              position: LatLng(geo.latitude, geo.longitude),
+              infoWindow: InfoWindow(
+                title: data['nomeEvento'],
+                snippet: data['endereco'],
+              ),
+            ),
+          );
+        }
+      }
+    }
+    setState(() {
+      _markers = markers;
+    });
+  }
+
+  void _onSearch(String value) {
+    setState(() {
+      _searchText = value;
+    });
+    _loadMarkers();
+  }
 
   void _onItemTapped(int index) async {
     setState(() {
       _selectedIndex = index;
     });
     if (index == 0) {
-      // Eventos
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const EventListPage()),
       );
     } else if (index == 1) {
-      // Mapa (já está aqui)
+      // já está na tela de mapa
     } else if (index == 2) {
-      // Cadastrar Evento
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const RegisterEvent()),
       );
     } else if (index == 3) {
-      // Sair (logout)
       await FirebaseAuth.instance.signOut();
       Navigator.pushAndRemoveUntil(
         context,
@@ -56,10 +98,15 @@ class _MapScreenState extends State<MapScreen> {
         ),
         child: Stack(
           children: [
-            Positioned.fill(
-              child: Container(
-                color: Colors.white.withOpacity(0.3),
+            GoogleMap(
+              initialCameraPosition: const CameraPosition(
+                target: LatLng(-19.975, -44.005),
+                zoom: 12,
               ),
+              markers: _markers,
+              onMapCreated: (controller) => _mapController = controller,
+              myLocationEnabled: true,
+              myLocationButtonEnabled: true,
             ),
             Positioned(
               top: 60,
@@ -72,32 +119,19 @@ class _MapScreenState extends State<MapScreen> {
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Color.fromARGB((0.1 * 255).toInt(), 0, 0, 0),
                       blurRadius: 4,
                       offset: const Offset(0, 2),
                     ),
                   ],
                 ),
-                child: const TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Digite o nome do evento...',
+                child: TextField(
+                  decoration: const InputDecoration(
+                    hintText: 'Pesquisar evento pelo nome...',
                     border: InputBorder.none,
                     icon: Icon(Icons.search),
-                    suffixIcon: Icon(Icons.clear),
                   ),
-                ),
-              ),
-            ),
-            Positioned(
-              top: 120,
-              left: 16,
-              right: 16,
-              bottom: 16,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: Image.asset(
-                  'lib/assets/maps.png',
-                  fit: BoxFit.cover,
+                  onChanged: _onSearch,
                 ),
               ),
             ),
