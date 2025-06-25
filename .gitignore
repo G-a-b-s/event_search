@@ -10,7 +10,9 @@ build/
 .idea/
 android/.gradle/
 *.iml
-
+**/linux/flutter/*
+**/windows/flutter/*
+**/macos/Flutter/*
 # iOS
 ios/Pods/
 ios/.symlinks/
